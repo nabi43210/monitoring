@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <dirent.h>
+#include <string.h>
+#include <stdbool.h>
 
-char * get_ps_location(int num, char * str) {
-    sprintf(str, "/proc/%d/status", num);
+char * get_ps_location(int pid, char * str) {
+    sprintf(str, "/proc/%d/status", pid);
     return str;
 }
 
@@ -12,22 +14,51 @@ int main(void) {
     DIR * proc_dp;
     struct dirent * proc_dirp;
     char * PROC_ADDRESS = "/proc";
-    int get_proc_number = 0;
+    int pid = 0;
     char proc_location[50];
     char buffer[BUFSIZ]; 
     int line = 0;
+    char * temp;
+    bool data_vaild = false;
 
     proc_dp = opendir(PROC_ADDRESS);
     while((proc_dirp = readdir(proc_dp)) != NULL) {
-	get_proc_number = atoi(proc_dirp -> d_name); //get All proc folders only number
-	if(get_proc_number == 0)
+	pid = atoi(proc_dirp -> d_name); //get pid 
+	if(pid == 0)
 	    continue;
 	else {
-	    get_ps_location(get_proc_number, proc_location);
+	    get_ps_location(pid, proc_location);
 	    status = fopen(proc_location, "r");
 	    while(fgets(buffer, BUFSIZ, status) != NULL) { //print All status file...
 	        line++;
-		printf("%s", buffer);
+		temp = strtok(buffer, "\t");
+		while(temp != NULL) {
+		    if(data_vaild == true) {
+		        printf("%8s ", temp);
+			data_vaild = false;
+		    }	
+		    else if(strstr(temp, "Name")) {
+		        printf("Name ");	
+			data_vaild = true;
+		    }
+		    else if(strstr(temp, "Pid")) {
+			printf("Pid ");
+			data_vaild = true;
+		    }
+		    else if(strstr(temp, "PPid")) {
+			printf("PPid ");
+			data_vaild = true;
+		    }
+		    else if(strstr(temp, "VmSize")) {
+			printf("VmSize ");
+			data_vaild = true;
+		    }
+		    else if(strstr(temp, "Threads")) {
+			printf("Threads ");
+			data_vaild = true;
+		    }
+		    temp = strtok(NULL, "\t");
+		}
 	    }
 	    line = 0;
 	}
