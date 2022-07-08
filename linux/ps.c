@@ -20,6 +20,7 @@ int main(void) {
     int line = 0;
     char * temp;
     bool data_vaild = false;
+    int count = 0;
 
     proc_dp = opendir(PROC_ADDRESS);
     while((proc_dirp = readdir(proc_dp)) != NULL) {
@@ -27,6 +28,7 @@ int main(void) {
 	if(pid == 0)
 	    continue;
 	else {
+	    printf("==========================\n");
 	    get_ps_location(pid, proc_location);
 	    status = fopen(proc_location, "r");
 	    while(fgets(buffer, BUFSIZ, status) != NULL) { //print All status file...
@@ -41,9 +43,10 @@ int main(void) {
 		        printf("Name ");	
 			data_vaild = true;
 		    }
-		    else if(strstr(temp, "Pid")) {
+		    else if(strstr(temp, "Pid") && count == 0) {
 			printf("Pid ");
 			data_vaild = true;
+			count += 1;
 		    }
 		    else if(strstr(temp, "PPid")) {
 			printf("PPid ");
@@ -60,6 +63,7 @@ int main(void) {
 		    temp = strtok(NULL, "\t");
 		}
 	    }
+	    count = 0;
 	    line = 0;
 	}
     }
