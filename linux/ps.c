@@ -4,10 +4,10 @@
 #include <string.h>
 #include <stdbool.h>
 
-typedef struct Process_Info {
-    struct Process_Info *prev;
-    struct Process_Info *next; 
-    char pid[10];
+typedef struct _process_info {
+    struct _process_info *prev;
+    struct _process_info *next; 
+    int pid;
     char ppid[10];
     char name[50];
     char VmSize[20];
@@ -41,8 +41,10 @@ void add_ps_list(process_info * p) {
 
 void print_all_list(process_info *p) {
     for(p; p != tail; p = p -> next) {
+	if(!strstr(p -> VmSize, " "))
+	    continue;
         printf("======================================\n");	
-	printf("Name : %s Pid : %s PPid : %s VmSize : %s\n", (*p).name, (*p).pid, (*p).ppid, (*p).VmSize); 
+	printf("Name : %sPid : %d\nPPid : %sVmSize : %s", (*p).name, (*p).pid, (*p).ppid, (*p).VmSize); 
     }
     printf("======================================\n");	
 }
@@ -73,6 +75,7 @@ int main(void) {
 	    continue;
 	else {
 	    process_info *p = (process_info*)malloc(sizeof(process_info));
+	    p -> pid = pid; 
 	    get_ps_location(pid, proc_location);
 	    status = fopen(proc_location, "r");
 	    while(fgets(buffer, BUFSIZ, status) != NULL) { //print All status file...
@@ -83,10 +86,8 @@ int main(void) {
 		        if(count == 1)
 			    strcpy(p -> name, temp);
 		        else if(count == 2)
-			    strcpy(p -> pid, temp);
-		        else if(count == 3)
 			    strcpy(p -> ppid, temp);
-		        else if(count == 4)
+		        else if(count == 3)
 			    strcpy(p -> VmSize, temp);	
 			data_vaild = false;
 		    }	
@@ -94,17 +95,13 @@ int main(void) {
 			count = 1;
 			data_vaild = true;
 		    }
-		    else if(strstr(temp, "Pid") && count == 1) {
+		    else if(strstr(temp, "PPid")) {
 			data_vaild = true;
 			count = 2;
 		    }
-		    else if(strstr(temp, "PPid")) {
-			data_vaild = true;
-			count = 3;
-		    }
 		    else if(strstr(temp, "VmSize")) {
 			data_vaild = true;
-			count = 4;
+			count = 3;
 		    }
 		    temp = strtok(NULL, "\t");
 		}
