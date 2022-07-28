@@ -5,6 +5,7 @@
 //디버그 권한 추가 완료
 
 **NT Legacy 드라이버로 EPROESS구조체 접근하여 프로세스 정보 가져오기 --> PS_DRIVER_1**
+- 소스코드 : psdriver.c
 - 결과 출력은 함수 내 DbgPrint()를 사용했음: DbgView.exe로 화면으로 확인 가능함
 - 드라이버 빌드하는법
     * Enterprise WDK 사용
