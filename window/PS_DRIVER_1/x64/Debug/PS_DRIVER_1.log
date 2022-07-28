@@ -1,0 +1,9 @@
+﻿  Building 'PS_DRIVER_1' with toolset 'WindowsKernelModeDriver10.0' and the 'Desktop' target platform.
+  psdriver.c
+F:\2022\Driver\ProcessDriver2\PS_DRIVER_1\PS_DRIVER_1\psdriver.c(26,99): warning C4311: '형식 캐스트': 'unsigned char *'에서 'int'(으)로 포인터가 잘립니다.
+  PS_DRIVER_1.vcxproj -> F:\2022\Driver\ProcessDriver2\PS_DRIVER_1\x64\Debug\PS_DRIVER_1.sys
+  Done Adding Additional Store
+  Successfully signed: F:\2022\Driver\ProcessDriver2\PS_DRIVER_1\x64\Debug\PS_DRIVER_1.sys
+  
+  Inf2Cat task was skipped as there were no inf files to process
+  
