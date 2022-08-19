@@ -5,56 +5,18 @@
 #include <stdbool.h>
 
 typedef struct _process_info {
-    struct _process_info *prev;
-    struct _process_info *next; 
     int pid;
     char ppid[10];
     char name[50];
     char VmSize[20];
 }process_info;
 
-process_info *head, *tail;
-
-void init_ps_list(void) {
-    head = (process_info*)malloc(sizeof(process_info));
-    tail = (process_info*)malloc(sizeof(process_info));
-    head -> next = tail;
-    head -> prev = head;
-    tail -> next = tail;
-    tail -> prev = head;
-}
-
-void add_ps_list(process_info * p) {
-    if(head -> next == tail) {
-        p -> prev = head;
-	p -> next = tail;
-	head -> next = p;
-	tail -> prev = p;
-    }
-    else {
-        p -> next = tail;
-	p -> prev = tail -> prev;
-	tail -> prev -> next = p;
-	tail -> prev = p;
-    }
-}
-
-void print_all_list(process_info *p) {
-    for(p; p != tail; p = p -> next) {
-	if(!strstr(p -> VmSize, " "))
-	    continue;
-        printf("======================================\n");	
-	printf("Name : %sPid : %d\nPPid : %sVmSize : %s", (*p).name, (*p).pid, (*p).ppid, (*p).VmSize); 
-    }
-    printf("======================================\n");	
-}
-
 char * get_ps_location(int pid, char * str) {
     sprintf(str, "/proc/%d/status", pid);
     return str;
 }
 
-int main(void) {
+void ps_view(void) {
     FILE * status; 
     DIR * proc_dp;
     struct dirent * proc_dirp;
@@ -66,16 +28,15 @@ int main(void) {
     char * temp;
     bool data_vaild = false;
     int count = 0;
+    process_info p;
 
-    init_ps_list();
     proc_dp = opendir(PROC_ADDRESS);
     while((proc_dirp = readdir(proc_dp)) != NULL) {
 	pid = atoi(proc_dirp -> d_name); //get pid 
 	if(pid == 0)
 	    continue;
 	else {
-	    process_info *p = (process_info*)malloc(sizeof(process_info));
-	    p -> pid = pid; 
+	    p.pid = pid; 
 	    get_ps_location(pid, proc_location);
 	    status = fopen(proc_location, "r");
 	    while(fgets(buffer, BUFSIZ, status) != NULL) { //print All status file...
@@ -83,12 +44,13 @@ int main(void) {
 		temp = strtok(buffer, "\t");
 		while(temp != NULL) {
 		    if(data_vaild == true) {
+			temp = strtok(temp, "\n");
 		        if(count == 1)
-			    strcpy(p -> name, temp);
-		        else if(count == 2)
-			    strcpy(p -> ppid, temp);
+			    strcpy(p.name, temp);
+			else if(count == 2)
+			    strcpy(p.ppid, temp);
 		        else if(count == 3)
-			    strcpy(p -> VmSize, temp);	
+			    strcpy(p.VmSize, temp);	
 			data_vaild = false;
 		    }	
 		    else if(strstr(temp, "Name")) {
@@ -106,12 +68,21 @@ int main(void) {
 		    temp = strtok(NULL, "\t");
 		}
 	    }
-	    add_ps_list(p);
+	    printf("%4d %8s %8s %8s\n", p.pid, p.name, p.ppid, p.VmSize);
 	    count = 0;
 	    line = 0;
+	    fclose(status);
 	}
     }
-    print_all_list(head -> next);
     close(proc_dp);
+}
+
+int main(void) {
+    //ps_view();
+    while(1) { 
+        ps_view();
+	sleep(1);
+        system("clear");
+    }	
     return 0;
 }
